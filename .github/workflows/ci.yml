@@ -90,8 +90,4 @@ jobs:
         with:
           gemini_api_key: ${{ env.GEMINI_API_KEY }}
           gemini_model: "gemini-1.5-flash"
-          prompt: |
-            Please review these code changes and provide brief feedback.
-            
-            DIFFERENCE:
-            ${{ steps.diff.outputs.diff }}
+          prompt: "Hello"
