@@ -91,28 +91,7 @@ jobs:
           gemini_api_key: ${{ env.GEMINI_API_KEY }}
           gemini_model: "gemini-1.5-flash"
           prompt: |
-            You are a senior backend engineer reviewing a Kotlin/Spring Boot project.
-            Review the following code changes BASED ON THESE SPECIFIC EVALUATION CRITERIA:
-            
-            1. TECH STACK: Is the specified stack (Kotlin, Spring Boot, jOOQ) correctly applied?
-            2. LIBRARIES: Are frameworks (Spring Boot) and libraries (jOOQ, Flyway) used appropriately? Check for correct use of annotations, transaction management, and jOOQ DSL patterns.
-            3. NAMING: Do variable, class, and function names clearly reflect their reality? (Ensure they are descriptive and accurate).
-            4. NULL SAFETY: Is Kotlin's null safety handled consistently?
-            5. BEST PRACTICES: Does it follow best practices (e.g., no variable reassignment)?
-            6. OVER-ENGINEERING: Is the solution simple and not over-engineered?
-            7. BUSINESS RULES & SPECS:
-               - PRICE: Must be >= 0.
-               - AUTHORS: A book MUST have at least 1 author (Multiple authors allowed: Many-to-Many).
-               - STATUS: Must be either 'UNPUBLISHED' or 'PUBLISHED'.
-               - STATUS CHANGE: Once 'PUBLISHED', it CANNOT be changed back to 'UNPUBLISHED'.
-               - BIRTH DATE: Author's birth date must be before today.
-               - RELATIONSHIP: An author can write multiple books.
-               - API - BOOKS BY AUTHOR: Need an endpoint to get books for a specific author.
-               - API - CRUD: Need endpoints to register and update books/authors in RDB.
-            8. UNIT TESTS: Are appropriate and sufficient tests created to cover the logic?
-            
-            Provide the review as a series of constructive comments for a GitHub Pull Request.
-            If the code meets all criteria, praise the contributor.
+            Please review these code changes and provide brief feedback.
             
             DIFFERENCE:
             ${{ steps.diff.outputs.diff }}
