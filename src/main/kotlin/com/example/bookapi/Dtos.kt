@@ -1,6 +1,8 @@
 package com.example.bookapi
 
+import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Past
 import java.time.LocalDate
 
@@ -20,3 +22,23 @@ data class AuthorResponse(
     val birthDate: LocalDate
 )
 
+data class CreateBookRequest(
+    @field:NotBlank val title: String,
+    @field:Min(0) val price: Int,
+    @field:NotNull val authorId: Long,
+    @field:NotBlank val publicationStatus: String
+)
+
+data class UpdateBookRequest(
+    @field:NotBlank val title: String,
+    @field:Min(0) val price: Int,
+    @field:NotBlank val publicationStatus: String
+)
+
+data class BookResponse(
+    val id: Long,
+    val title: String,
+    val price: Int,
+    val publicationStatus: String,
+    val author: AuthorResponse
+)
