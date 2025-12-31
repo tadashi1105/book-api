@@ -54,59 +54,11 @@ jobs:
           SPRING_DATASOURCE_PASSWORD: password
 
   ai-review:
-    name: AI Code Review
-    runs-on: ubuntu-latest
+    uses: ./.github/workflows/gemini-review.yml
     if: github.event_name == 'pull_request'
     permissions:
       contents: read
       pull-requests: write
       issues: write
-    env:
-      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Check GEMINI_API_KEY present
-        if: ${{ env.GEMINI_API_KEY == '' }}
-        run: echo "GEMINI_API_KEY is not set; skipping AI Code Review."
-
-      - name: Get diff
-        id: diff
-        run: |
-          git diff origin/${{ github.base_ref }}..HEAD > pr.diff
-          {
-            echo "diff<<EOF"
-            cat pr.diff
-            echo "EOF"
-          } >> "$GITHUB_OUTPUT"
-
-      - name: List Available Gemini Models
-        if: ${{ env.GEMINI_API_KEY != '' }}
-        run: |
-          npm install -g @google/gemini-cli
-          gemini --list-models || echo "Failed to list models"
-
-      - name: AI Code Review (Gemini)
-        uses: google-github-actions/run-gemini-cli@v0
-        if: ${{ env.GEMINI_API_KEY != '' }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          gemini_api_key: ${{ env.GEMINI_API_KEY }}
-          gemini_model: "gemini-1.5-flash"
-          prompt: |
-            Please review the following code changes and provide constructive feedback.
-            
-            DIFFERENCE:
-            ${{ steps.diff.outputs.diff }}
-
-      - name: Cat Gemini Error Log
-        if: failure()
-        run: |
-          if [ -f /tmp/gemini-client-error-*.json ]; then
-            cat /tmp/gemini-client-error-*.json
-          else
-            echo "No Gemini error log found."
-          fi
+      id-token: write
+    secrets: inherit
