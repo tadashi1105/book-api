@@ -91,3 +91,12 @@ jobs:
           gemini_api_key: ${{ env.GEMINI_API_KEY }}
           gemini_model: "gemini-1.5-flash"
           prompt: "Hello"
+
+      - name: Cat Gemini Error Log
+        if: failure()
+        run: |
+          if [ -f /tmp/gemini-client-error-*.json ]; then
+            cat /tmp/gemini-client-error-*.json
+          else
+            echo "No Gemini error log found."
+          fi
