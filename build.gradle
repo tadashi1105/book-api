@@ -3,6 +3,7 @@ plugins {
 	id 'org.jetbrains.kotlin.plugin.spring' version '1.9.25'
 	id 'org.springframework.boot' version '3.5.9'
 	id 'io.spring.dependency-management' version '1.1.7'
+	id 'com.diffplug.spotless' version '6.25.0'
 }
 
 group = 'com.example'
@@ -39,4 +40,11 @@ kotlin {
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+spotless {
+	kotlin {
+		target 'src/**/*.kt'
+		ktlint('1.0.1')
+	}
 }

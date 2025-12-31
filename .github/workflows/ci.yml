@@ -1,0 +1,106 @@
+name: CI
+
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+    branches: [ "**" ]
+
+jobs:
+  build-and-test:
+    name: Build & Test (Java ${{ matrix.java-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        java-version: [17, 21]
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: bookdb
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ matrix.java-version }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ matrix.java-version }}
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Check Format (Spotless)
+        run: ./gradlew spotlessCheck
+
+      - name: Build and Test
+        run: ./gradlew test
+        env:
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/bookdb
+          SPRING_DATASOURCE_USERNAME: user
+          SPRING_DATASOURCE_PASSWORD: password
+
+  ai-review:
+    name: AI Code Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get diff
+        id: diff
+        run: |
+          git diff origin/${{ github.base_ref }}..HEAD > pr.diff
+          echo "diff=$(cat pr.diff)" >> $GITHUB_OUTPUT
+
+      - name: AI Code Review (Gemini)
+        uses: google-github-actions/run-gemini-cli@v0
+        if: env.GEMINI_API_KEY != ''
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          prompt: |
+            You are a senior backend engineer reviewing a Kotlin/Spring Boot project.
+            Review the following code changes BASED ON THESE SPECIFIC EVALUATION CRITERIA:
+            
+            1. TECH STACK: Is the specified stack (Kotlin, Spring Boot, jOOQ) correctly applied?
+            2. LIBRARIES: Are frameworks (Spring Boot) and libraries (jOOQ, Flyway) used appropriately? Check for correct use of annotations, transaction management, and jOOQ DSL patterns.
+            3. NAMING: Do variable, class, and function names clearly reflect their reality? (Ensure they are descriptive and accurate).
+            4. NULL SAFETY: Is Kotlin's null safety handled consistently?
+            5. BEST PRACTICES: Does it follow best practices (e.g., no variable reassignment)?
+            6. OVER-ENGINEERING: Is the solution simple and not over-engineered?
+            7. BUSINESS RULES & SPECS:
+               - PRICE: Must be >= 0.
+               - AUTHORS: A book MUST have at least 1 author (Multiple authors allowed: Many-to-Many).
+               - STATUS: Must be either 'UNPUBLISHED' or 'PUBLISHED'.
+               - STATUS CHANGE: Once 'PUBLISHED', it CANNOT be changed back to 'UNPUBLISHED'.
+               - BIRTH DATE: Author's birth date must be before today.
+               - RELATIONSHIP: An author can write multiple books.
+               - API - BOOKS BY AUTHOR: Need an endpoint to get books for a specific author.
+               - API - CRUD: Need endpoints to register and update books/authors in RDB.
+            8. UNIT TESTS: Are appropriate and sufficient tests created to cover the logic?
+            
+            Provide the review as a series of constructive comments for a GitHub Pull Request.
+            If the code meets all criteria, praise the contributor.
+            
+            DIFFERENCE:
+            ${{ steps.diff.outputs.diff }}
