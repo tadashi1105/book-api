@@ -36,6 +36,11 @@ class BookService(
         return record.toResponse(author)
     }
 
+    fun findByAuthorId(authorId: Long): List<BookResponse> {
+        val author = authorService.findById(authorId)
+        return bookRepository.findByAuthorId(authorId).map { it.toResponse(author) }
+    }
+
     fun update(id: Long, request: UpdateBookRequest): BookResponse {
         val existing = bookRepository.findById(id) ?: throw EntityNotFoundException("Book not found with id: $id")
 

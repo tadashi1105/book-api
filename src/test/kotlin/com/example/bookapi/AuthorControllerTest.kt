@@ -22,6 +22,9 @@ class AuthorControllerTest {
     @MockkBean
     private lateinit var authorService: AuthorService
 
+    @MockkBean
+    private lateinit var bookService: BookService
+
     @Test
     fun `should create author`() {
         val request = """
@@ -51,5 +54,17 @@ class AuthorControllerTest {
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.id").value(1L))
             .andExpect(jsonPath("$.name").value("Author One"))
+    }
+
+    @Test
+    fun `should get books by author id`() {
+        val author = AuthorResponse(1L, "Author One", LocalDate.of(1980, 5, 20))
+        val books = listOf(BookResponse(10L, "Book One", 1000, "PUBLISHED", author))
+        every { bookService.findByAuthorId(1L) } returns books
+
+        mockMvc.perform(get("/authors/1/books"))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$[0].id").value(10L))
+            .andExpect(jsonPath("$[0].title").value("Book One"))
     }
 }

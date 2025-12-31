@@ -31,4 +31,9 @@ class AuthorController(
     fun update(@PathVariable id: Long, @Valid @RequestBody request: UpdateAuthorRequest): AuthorResponse {
         return authorService.update(id, request)
     }
+
+    @GetMapping("/{id}/books")
+    fun getBooksByAuthor(@PathVariable id: Long): List<BookResponse> {
+        return bookService.findByAuthorId(id)
+    }
 }
