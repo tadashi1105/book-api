@@ -69,7 +69,11 @@ jobs:
         id: diff
         run: |
           git diff origin/${{ github.base_ref }}..HEAD > pr.diff
-          echo "diff=$(cat pr.diff)" >> $GITHUB_OUTPUT
+          {
+            echo "diff<<EOF"
+            cat pr.diff
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
 
       - name: AI Code Review (Gemini)
         uses: google-github-actions/run-gemini-cli@v0
