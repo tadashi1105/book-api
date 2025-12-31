@@ -82,6 +82,12 @@ jobs:
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
+      - name: List Available Gemini Models
+        if: ${{ env.GEMINI_API_KEY != '' }}
+        run: |
+          npm install -g @google/gemini-cli
+          gemini --list-models || echo "Failed to list models"
+
       - name: AI Code Review (Gemini)
         uses: google-github-actions/run-gemini-cli@v0
         if: ${{ env.GEMINI_API_KEY != '' }}
@@ -89,7 +95,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           gemini_api_key: ${{ env.GEMINI_API_KEY }}
-          gemini_model: "gemini-pro"
+          gemini_model: "gemini-1.5-flash"
           prompt: |
             Please review the following code changes and provide constructive feedback.
             
