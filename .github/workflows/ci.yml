@@ -60,13 +60,16 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+      issues: write
+    env:
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Check GEMINI_API_KEY present
-        if: ${{ secrets.GEMINI_API_KEY == '' }}
+        if: ${{ env.GEMINI_API_KEY == '' }}
         run: echo "GEMINI_API_KEY is not set; skipping AI Code Review."
 
       - name: Get diff
@@ -81,11 +84,11 @@ jobs:
 
       - name: AI Code Review (Gemini)
         uses: google-github-actions/run-gemini-cli@v0
-        if: ${{ secrets.GEMINI_API_KEY != '' }}
+        if: ${{ env.GEMINI_API_KEY != '' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+          gemini_api_key: ${{ env.GEMINI_API_KEY }}
           prompt: |
             You are a senior backend engineer reviewing a Kotlin/Spring Boot project.
             Review the following code changes BASED ON THESE SPECIFIC EVALUATION CRITERIA:
