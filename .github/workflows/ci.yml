@@ -2,7 +2,7 @@ name: CI
 
 on:
   pull_request:
-    branches: [ "**" ]
+    types: [opened, synchronize, reopened]
 
 jobs:
   build-and-test:
@@ -50,13 +50,3 @@ jobs:
           SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/bookdb
           SPRING_DATASOURCE_USERNAME: user
           SPRING_DATASOURCE_PASSWORD: password
-
-  ai-review:
-    uses: ./.github/workflows/gemini-review.yml
-    if: github.event_name == 'pull_request'
-    permissions:
-      contents: read
-      pull-requests: write
-      issues: write
-      id-token: write
-    secrets: inherit
