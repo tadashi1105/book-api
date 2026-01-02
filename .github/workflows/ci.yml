@@ -3,12 +3,51 @@ name: CI
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
+
+# To follow the principle of least privilege, limit the workflow's permissions to read-only for enhanced security.
+permissions:
+  contents: read
+
+# To save resources, automatically cancel older workflow runs on consecutive pushes to the same branch/PR.
+# Including event_name ensures that push and pull_request runs do not interfere with each other.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build-and-test:
-    name: Build & Test (Java ${{ matrix.java-version }})
+  # The lint job independently checks for code formatting issues.
+  # It's lightweight (no DB required) and runs before heavier jobs to detect issues early.
+  lint:
+    name: Lint (Spotless)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      # Grant execute permission for gradlew in case it's not preserved in the Git repository.
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Check Format
+        run: ./gradlew spotlessCheck
+
+  # To ensure PR quality, run full integration tests with a database across multiple Java versions.
+  test-pr:
+    name: Integration Test on PR (Java ${{ matrix.java-version }})
+    if: github.event_name == 'pull_request'
+    # Run only if the lint job succeeds.
+    needs: lint
     runs-on: ubuntu-latest
     strategy:
+      # Even if one Java version fails, continue with other versions to get a complete picture of the test results.
       fail-fast: false
       matrix:
         java-version: [17, 21]
@@ -22,8 +61,9 @@ jobs:
           POSTGRES_PASSWORD: password
         ports:
           - 5432:5432
+        # Wait for the DB container to be fully up and ready, which improves test stability.
         options: >-
-          --health-cmd "pg_isready -U user"
+          --health-cmd "pg_isready -U user -d bookdb"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -41,12 +81,33 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Check Format (Spotless)
-        run: ./gradlew spotlessCheck
-
       - name: Build and Test
         run: ./gradlew test
         env:
           SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/bookdb
           SPRING_DATASOURCE_USERNAME: user
           SPRING_DATASOURCE_PASSWORD: password
+
+  # This job ensures the application is buildable after merging to the main branch.
+  # Since tests have already passed in the PR, we skip them here for a faster run.
+  build-main:
+    name: Build on Main Push (Java 17)
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # The -x test flag skips running the tests, performing only the build.
+      - name: Build without tests
+        run: ./gradlew build -x test
