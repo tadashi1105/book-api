@@ -8,10 +8,11 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional
 class AuthorService(private val authorRepository: AuthorRepository) {
     fun create(request: CreateAuthorRequest): AuthorResponse {
-        val record = AuthorsRecord().apply {
-            name = request.name
-            birthDate = request.birthDate
-        }
+        val record =
+            AuthorsRecord().apply {
+                name = request.name
+                birthDate = request.birthDate
+            }
         val saved = authorRepository.insert(record)
         return saved.toResponse()
     }
@@ -25,7 +26,10 @@ class AuthorService(private val authorRepository: AuthorRepository) {
         return authorRepository.findAll().map { it.toResponse() }
     }
 
-    fun update(id: Long, request: UpdateAuthorRequest): AuthorResponse {
+    fun update(
+        id: Long,
+        request: UpdateAuthorRequest,
+    ): AuthorResponse {
         val existing = authorRepository.findById(id) ?: throw EntityNotFoundException("Author not found with id: $id")
         existing.apply {
             name = request.name
@@ -35,9 +39,10 @@ class AuthorService(private val authorRepository: AuthorRepository) {
         return updated.toResponse()
     }
 
-    private fun AuthorsRecord.toResponse() = AuthorResponse(
-        id = this.id!!,
-        name = this.name!!,
-        birthDate = this.birthDate!!
-    )
+    private fun AuthorsRecord.toResponse() =
+        AuthorResponse(
+            id = this.id!!,
+            name = this.name!!,
+            birthDate = this.birthDate!!,
+        )
 }

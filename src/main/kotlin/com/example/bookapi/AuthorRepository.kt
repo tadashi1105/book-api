@@ -5,13 +5,15 @@ import com.example.bookapi.jooq.tables.references.AUTHORS
 import org.jooq.DSLContext
 import org.springframework.stereotype.Repository
 
+import org.springframework.dao.DataAccessException
+
 @Repository
 class AuthorRepository(private val dsl: DSLContext) {
     fun insert(author: AuthorsRecord): AuthorsRecord {
         return dsl.insertInto(AUTHORS)
             .set(author)
             .returning()
-            .fetchOne() ?: throw RuntimeException("Failed to insert author")
+            .fetchOne() ?: throw DataAccessException("Failed to insert author")
     }
 
     fun findById(id: Long): AuthorsRecord? {

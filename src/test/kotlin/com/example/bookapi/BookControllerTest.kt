@@ -1,5 +1,6 @@
 package com.example.bookapi
 
+import java.time.LocalDate
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import org.junit.jupiter.api.Test
@@ -9,14 +10,11 @@ import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import java.time.LocalDate
 
 @WebMvcTest(BookController::class)
 class BookControllerTest {
-
     @Autowired
     private lateinit var mockMvc: MockMvc
 
@@ -26,21 +24,24 @@ class BookControllerTest {
     @Test
     fun `should create book`() {
         val author = AuthorResponse(1L, "Author", LocalDate.of(1990, 1, 1))
-        val request = """
+        val request =
+            """
             {
                 "title": "New Book",
                 "price": 1500,
                 "authorId": 1,
                 "publicationStatus": "UNPUBLISHED"
             }
-        """.trimIndent()
+            """.trimIndent()
 
         val response = BookResponse(10L, "New Book", 1500, "UNPUBLISHED", author)
         every { bookService.create(any()) } returns response
 
-        mockMvc.perform(post("/books")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(request))
+        mockMvc.perform(
+            post("/books")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(request),
+        )
             .andExpect(status().isCreated)
             .andExpect(jsonPath("$.id").value(10L))
             .andExpect(jsonPath("$.title").value("New Book"))

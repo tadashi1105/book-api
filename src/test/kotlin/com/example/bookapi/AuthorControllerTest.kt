@@ -1,5 +1,6 @@
 package com.example.bookapi
 
+import java.time.LocalDate
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import org.junit.jupiter.api.Test
@@ -11,11 +12,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import java.time.LocalDate
 
 @WebMvcTest(AuthorController::class)
 class AuthorControllerTest {
-
     @Autowired
     private lateinit var mockMvc: MockMvc
 
@@ -27,19 +26,22 @@ class AuthorControllerTest {
 
     @Test
     fun `should create author`() {
-        val request = """
+        val request =
+            """
             {
                 "name": "New Author",
                 "birthDate": "1990-01-01"
             }
-        """.trimIndent()
+            """.trimIndent()
 
         val response = AuthorResponse(1L, "New Author", LocalDate.of(1990, 1, 1))
         every { authorService.create(any()) } returns response
 
-        mockMvc.perform(post("/authors")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(request))
+        mockMvc.perform(
+            post("/authors")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(request),
+        )
             .andExpect(status().isCreated)
             .andExpect(jsonPath("$.id").value(1L))
             .andExpect(jsonPath("$.name").value("New Author"))
