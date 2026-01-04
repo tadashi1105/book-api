@@ -81,6 +81,13 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      - name: Migrate database
+        run: ./gradlew flywayMigrate
+        env:
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/bookdb
+          SPRING_DATASOURCE_USERNAME: user
+          SPRING_DATASOURCE_PASSWORD: password
+
       - name: Build and Test
         run: ./gradlew test
         env:
@@ -123,6 +130,13 @@ jobs:
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
+
+      - name: Migrate database
+        run: ./gradlew flywayMigrate
+        env:
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/bookdb
+          SPRING_DATASOURCE_USERNAME: user
+          SPRING_DATASOURCE_PASSWORD: password
 
       # The -x test flag skips running the tests, performing only the build.
       - name: Build without tests

@@ -120,6 +120,11 @@ tasks.named("compileKotlin") {
 	dependsOn(tasks.named("generateJooq"))
 }
 
+// Ensure Flyway migrations run before jOOQ code generation (for local and CI consistency)
+tasks.named("generateJooq") {
+	dependsOn(tasks.named("flywayMigrate"))
+}
+
 spotless {
 	kotlin {
 		target 'src/**/*.kt'
