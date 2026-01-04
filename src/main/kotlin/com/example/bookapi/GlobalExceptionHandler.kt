@@ -22,6 +22,8 @@ class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException::class)
     fun handleBadRequest(ex: IllegalArgumentException): ResponseEntity<ErrorResponse> {
+        // 戦略: IllegalArgumentExceptionを400 Bad Requestにマッピングする
+        // ビジネスルール違反（例：無効なステータス変更）や独自のバリデーション失敗に使用
         val error =
             ErrorResponse(
                 status = HttpStatus.BAD_REQUEST.value(),
