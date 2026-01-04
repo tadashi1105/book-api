@@ -41,7 +41,7 @@ repositories {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-jooq'
-	implementation 'org.jooq:jooq:3.19.10'
+	implementation 'org.jooq:jooq:3.19.29'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.flywaydb:flyway-core'
@@ -50,8 +50,8 @@ dependencies {
 	developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
 	runtimeOnly 'org.postgresql:postgresql'
 	jooqGenerator 'org.postgresql:postgresql:42.7.2'
-	jooqGenerator 'org.jooq:jooq-codegen:3.19.10'
-	jooqGenerator 'org.jooq:jooq-meta:3.19.10'
+	jooqGenerator 'org.jooq:jooq-codegen:3.19.29'
+	jooqGenerator 'org.jooq:jooq-meta:3.19.29'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'io.mockk:mockk:1.13.13'
 	testImplementation 'com.ninja-squad:springmockk:4.0.2'
@@ -70,7 +70,7 @@ tasks.named('test') {
 }
 
 jooq {
-	version = '3.19.10'  // Match Spring Boot 3.3.x default or compatible
+	version = '3.19.29'  // Match Spring Boot 3.3.x default or compatible
 	edition = 'OSS'
 
 	configurations {
