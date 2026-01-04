@@ -104,6 +104,20 @@ jooq {
 	}
 }
 
+// Ensure jOOQ-generated sources are part of the main source set
+sourceSets {
+	main {
+		java {
+			srcDirs += 'build/generated-src/jooq/main'
+		}
+	}
+}
+
+// Make sure that the jOOQ code generation is executed before compiling Kotlin code
+tasks.named("compileKotlin") {
+	dependsOn(tasks.named("generateJooq"))
+}
+
 spotless {
 	kotlin {
 		target 'src/**/*.kt'
