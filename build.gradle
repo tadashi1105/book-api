@@ -107,8 +107,8 @@ jooq {
 // Ensure jOOQ-generated sources are part of the main source set
 sourceSets {
 	main {
-		java {
-			srcDirs += 'build/generated-src/jooq/main'
+		kotlin {
+			srcDirs += 'build/generated-src/jooq/main/kotlin'
 		}
 	}
 }
